@@ -1,0 +1,35 @@
+version: "3"
+services:
+  nodejs:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run dev
+    working_dir: /usr/app
+    environment:
+      MIGRATE_dbConnectionUri: mongodb://mongo:27017/dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./src:/usr/app/src
+    links:
+      - neo4j
+      - redis
+
+  redis:
+    image: redis
+    expose:
+      - 6379
+
+  neo4j:
+    image: neo4j:4.0
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+    - ./src/seeds/data:/var/lib/neo4j/import/seeds
+    environment:
+      NEO4J_AUTH: neo4j/root
+      NEO4J_dbms_logs_debug_level: DEBUG
+
