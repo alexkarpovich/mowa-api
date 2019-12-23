@@ -25,6 +25,7 @@ const schemaUpdates = [
 ];
 
 const dataUpdates = [
+  `MERGE (:Active)`,
   `
     LOAD CSV WITH HEADERS FROM 'file:///seeds/languages.csv' AS row
     MERGE (l:Language {name: row.name, nativeName: row.nativeName, code: row.code})
@@ -35,8 +36,8 @@ const dataUpdates = [
   `,
   `
     LOAD CSV WITH HEADERS FROM 'file:///seeds/profiles.csv' AS row
-    MATCH (l:Language),(tr:Language), (u:User) WHERE l.code=row.translationLang AND tr.code=row.learningLang and u.email=row.owner
-    MERGE (u)-[:OWNS]->(p:Profile{id: row.id, name: row.name})
+    MATCH (l:Language),(tr:Language), (u:User), (a:Active) WHERE l.code=row.transLang AND tr.code=row.learnLang and u.email=row.owner
+    MERGE (u)-[:OWNS]->(p:Profile{id: row.id, name: row.name})<-[:INCLUDES]-(a)
     MERGE (tr)<-[:HAS_TRANSLATION_LANG]-(p)-[:HAS_LEARNING_LANG]->(l)
   `,
   `

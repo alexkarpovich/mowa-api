@@ -11,13 +11,26 @@ module.exports = gql`
     token: String!
   }
 
+  type Query {
+    profiles: [Profile!]!
+    series: [Series!]!
+  }
+
   type Mutation {
     signup(input: UserCreateInput!) : AuthPayload!
     login(email: String!, password: String!) : AuthPayload!
+    addProfile(input: AddProfileInput!) : Profile!
+    addSeries(name: String!) : Series!
   }
 
   input UserCreateInput {
     email: String!
     password: String!
+  }
+
+  input AddProfileInput {
+    name: String!
+    learnLang: String!
+    transLang: String!
   }
 `;
