@@ -13,6 +13,7 @@ module.exports = gql`
   type Mutation {
     editSeries(id: ID!, name: String!) : ID!
     deleteSeries(id: ID!) : ID!
-    addTerm(id: ID!, value: String) : Term!
+    attachTerm(id: ID!, value: String) : Term!
+    detachTerm(id: ID!, termId: ID!) : ID!
   }
 `;

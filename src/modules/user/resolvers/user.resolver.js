@@ -4,6 +4,8 @@ const UserSignup = require('../mutations/user-signup');
 const UserLogin = require('../mutations/user-login');
 const AddProfile = require('../mutations/add-profile');
 const AddSeries = require('../mutations/add-series');
+const AttachTranslation = require('../mutations/attach-translation');
+const DetachTranslation = require('../mutations/detach-translation');
 
 module.exports = {
   Query: {
@@ -21,5 +23,9 @@ module.exports = {
       AddProfile.exec({ parent, args, context, info}),
     addSeries: (parent, args, context, info) =>
       AddSeries.exec({ parent, args, context, info }),
+    attachTranslation: (parent, args, context, info) =>
+      AttachTranslation.exec({ parent, args, context, info }),
+    detachTranslation: (parent, args, context, info) =>
+      DetachTranslation.exec({ parent, args, context, info }),
   }
 };

@@ -21,6 +21,8 @@ module.exports = gql`
     login(email: String!, password: String!) : AuthPayload!
     addProfile(input: AddProfileInput!) : Profile!
     addSeries(name: String!) : Series!
+    attachTranslation(input: AttachTranslationInput!) : Tranlation!
+    detachTranslation(seriesId: ID!, translationId: ID!) : Boolean!
   }
 
   input UserCreateInput {
@@ -32,5 +34,13 @@ module.exports = gql`
     name: String!
     learnLang: String!
     transLang: String!
+  }
+
+  input AttachTranslationInput {
+    seriesId: ID!
+    termId: ID!
+    value: String!
+    transcription: String
+    details: String
   }
 `;

@@ -2,7 +2,7 @@ const uuid = require('uuid/v4');
 
 const Action = require('../../core/action');
 
-class AddTerm extends Action {
+class AttachTerm extends Action {
   async run() {
     const { id, value } = this.args;
     const { driver } = this.context;
@@ -11,9 +11,11 @@ class AddTerm extends Action {
 
     try {
       const { records } = await session.run(`
-        MATCH (s:Series) WHERE s.id=$id
-        CREATE (s)-[:INCLUDES]->(t:Term {id: $termId, value: $value})
-        RETURN t
+        MATCH (s:Series {id: $id})<-[:INCLUDES]-(p:Profile)-[:HAS_LEARNING_LANG]->(ll:Language)
+        MERGE (ll)-[:INCLUDES]->(term:Term {value: $value})
+        ON CREATE SET term.id = $termId
+        MERGE (s)-[:INCLUDES]->(term)
+        RETURN term
       `, params);
 
       return records[0].get('t').properties;
@@ -26,4 +28,4 @@ class AddTerm extends Action {
   }
 }
 
-module.exports = AddTerm;
+module.exports = AttachTerm;
