@@ -1,5 +1,6 @@
 const ProfilesQuery = require('../queries/profiles.query');
 const SeriesQuery = require('../queries/series.query');
+const SearchTranslations = require('../queries/search-translations.query');
 const UserSignup = require('../mutations/user-signup');
 const UserLogin = require('../mutations/user-login');
 const AddProfile = require('../mutations/add-profile');
@@ -12,7 +13,9 @@ module.exports = {
     profiles: (parent, args, context, info) =>
       ProfilesQuery.exec({ parent, args, context, info }),
     series: (parent, args, context, info) =>
-      SeriesQuery.exec({ parent, args, context, info })
+      SeriesQuery.exec({ parent, args, context, info }),
+    searchTranslations: (parent, args, context, info) =>
+      SearchTranslations.exec({ parent, args, context, info }),
   },
   Mutation: {
     signup: (parent, args, context, info) =>

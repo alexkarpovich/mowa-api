@@ -14,6 +14,7 @@ module.exports = gql`
   type Query {
     profiles: [Profile!]!
     series: [Series!]!
+    searchTranslations(value: String!): [Translation!]!
   }
 
   type Mutation {
