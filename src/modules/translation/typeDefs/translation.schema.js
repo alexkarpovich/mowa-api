@@ -1,7 +1,7 @@
 const { gql } = require('apollo-server-express');
 
 module.exports = gql`
-  type Tranlation {
+  type Translation {
     id: ID!
     value: String!
     transcription: String

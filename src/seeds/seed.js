@@ -53,15 +53,16 @@ const dataUpdates = [
   `,
   `
     LOAD CSV WITH HEADERS FROM 'file:///seeds/series.csv' AS row
-    MERGE (s:Series {id: row.id, name: row.name})
+    MATCH (p:Profile {id: row.profile})
+    CREATE (s:Series {id: row.id, name: row.name})<-[:INCLUDES]-(p)
     WITH row, s
     UNWIND split(row.terms, ',') AS termID
     MATCH (t:Term) WHERE t.id=termID
-    MERGE (s)-[:INCLUDES]->(t)
+    CREATE (s)-[:INCLUDES]->(t)
     WITH row, s
     UNWIND split(row.translations, ',') AS trID
     MATCH (tr:Translation) WHERE tr.id=trID
-    MERGE (s)-[:INCLUDES]->(tr)
+    CREATE (s)-[:INCLUDES]->(tr)
    `,
 ];
 const schemaSession = driver.session();

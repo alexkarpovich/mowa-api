@@ -22,7 +22,7 @@ module.exports = gql`
     login(email: String!, password: String!) : AuthPayload!
     addProfile(input: AddProfileInput!) : Profile!
     addSeries(name: String!) : Series!
-    attachTranslation(input: AttachTranslationInput!) : Tranlation!
+    attachTranslation(input: AttachTranslationInput!) : Translation!
     detachTranslation(seriesId: ID!, translationId: ID!) : Boolean!
   }
 
