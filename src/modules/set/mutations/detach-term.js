@@ -8,7 +8,7 @@ class DetachTerm extends Action {
 
     try {
       await session.run(`
-        MATCH (s:Series)-[ri:INCLUDES]->(t:Term) WHERE s.id=$id AND t.id=$termId
+        MATCH (s:Set)-[ri:INCLUDES]->(t:Term) WHERE s.id=$id AND t.id=$termId
         DELETE (ri)
       `, { id, termId });
 

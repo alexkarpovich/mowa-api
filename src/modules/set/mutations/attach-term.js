@@ -11,7 +11,7 @@ class AttachTerm extends Action {
 
     try {
       const { records } = await session.run(`
-        MATCH (s:Series {id: $id})<-[:INCLUDES]-(p:Profile)-[:HAS_LEARNING_LANG]->(ll:Language)
+        MATCH (s:Set {id: $id})<-[:INCLUDES]-(p:Profile)-[:HAS_LEARNING_LANG]->(ll:Language)
         MERGE (ll)-[:INCLUDES]->(term:Term {value: $value})
         ON CREATE SET term.id = $termId
         MERGE (s)-[:INCLUDES]->(term)

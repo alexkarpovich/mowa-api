@@ -1,16 +1,16 @@
 const Action = require('../../core/action');
 
-class DeleteSeries extends Action {
+class EditSet extends Action {
   async run() {
-    const { id } = this.args;
+    const { id, name } = this.args;
     const { driver } = this.context;
     const session = driver.session();
 
     try {
       await session.run(`
-        MATCH (s:Series) WHERE s.id=$id
-        DETACH DELETE s
-      `, { id });
+        MATCH (s:Set) WHERE s.id=$id
+        SET s.name=$name
+      `, { id, name });
 
       return id;
     } catch (err) {
@@ -22,4 +22,4 @@ class DeleteSeries extends Action {
   }
 }
 
-module.exports = DeleteSeries;
+module.exports = EditSet;

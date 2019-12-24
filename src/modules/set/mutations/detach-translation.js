@@ -9,7 +9,7 @@ class DetachTranslation extends Action {
 
     try {
       await session.run(`
-        MATCH (s:Series {id: $seriesId})-[ri:INCLUDES]->(tr:Translation {id: $translationId})
+        MATCH (s:Set {id: $setId})-[ri:INCLUDES]->(tr:Translation {id: $translationId})
         DELETE ri
       `, this.args);
 

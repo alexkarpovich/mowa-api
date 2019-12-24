@@ -8,7 +8,7 @@ class TermsQuery extends Action {
 
     try {
       const { records } = await session.run(`
-        MATCH (s:Series)-[:INCLUDES]->(t:Term) WHERE s.id=$id
+        MATCH (s:Set)-[:INCLUDES]->(t:Term) WHERE s.id=$id
         RETURN t
       `, { id });
 

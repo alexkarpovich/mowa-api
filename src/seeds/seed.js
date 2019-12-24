@@ -12,9 +12,9 @@ const schemaUpdates = [
   //'CREATE CONSTRAINT ON (p:Profile) ASSERT exists(p.name)',
   'CREATE CONSTRAINT ON (p:Profile) ASSERT p.id IS UNIQUE',
 
-  //'CREATE CONSTRAINT ON (s:Series) ASSERT exists(s.id)',
-  //'CREATE CONSTRAINT ON (s:Series) ASSERT exists(s.name)',
-  'CREATE CONSTRAINT ON (s:Series) ASSERT s.id IS UNIQUE',
+  //'CREATE CONSTRAINT ON (s:Set) ASSERT exists(s.id)',
+  //'CREATE CONSTRAINT ON (s:Set) ASSERT exists(s.name)',
+  'CREATE CONSTRAINT ON (s:Set) ASSERT s.id IS UNIQUE',
 
   //'CREATE CONSTRAINT ON (t:Term) ASSERT exists(t.id)',
   'CREATE CONSTRAINT ON (t:Term) ASSERT t.id IS UNIQUE',
@@ -36,7 +36,7 @@ const dataUpdates = [
   `,
   `
     LOAD CSV WITH HEADERS FROM 'file:///seeds/profiles.csv' AS row
-    MATCH (l:Language),(tr:Language), (u:User), (a:Active) WHERE l.code=row.transLang AND tr.code=row.learnLang and u.email=row.owner
+    MATCH (l:Language {code: row.learnLang}),(tr:Language {code: row.transLang}), (u:User {email: row.owner}), (a:Active)
     MERGE (u)-[:OWNS]->(p:Profile{id: row.id, name: row.name})<-[:INCLUDES]-(a)
     MERGE (tr)<-[:HAS_TRANSLATION_LANG]-(p)-[:HAS_LEARNING_LANG]->(l)
   `,
@@ -52,17 +52,17 @@ const dataUpdates = [
     MERGE (ft)<-[:FROM]-(tr:Translation {id: row.id, transcription: row.transcription, details: row.details})-[:TO]->(tt)
   `,
   `
-    LOAD CSV WITH HEADERS FROM 'file:///seeds/series.csv' AS row
+    LOAD CSV WITH HEADERS FROM 'file:///seeds/sets.csv' AS row
     MATCH (p:Profile {id: row.profile})
-    CREATE (s:Series {id: row.id, name: row.name})<-[:INCLUDES]-(p)
+    MERGE (s:Set {id: row.id, name: row.name})
+    MERGE (s)<-[:INCLUDES]-(p)
     WITH row, s
-    UNWIND split(row.terms, ',') AS termID
-    MATCH (t:Term) WHERE t.id=termID
-    CREATE (s)-[:INCLUDES]->(t)
-    WITH row, s
-    UNWIND split(row.translations, ',') AS trID
-    MATCH (tr:Translation) WHERE tr.id=trID
-    CREATE (s)-[:INCLUDES]->(tr)
+    FOREACH (termID IN split(row.terms, ',') |
+      MERGE (t:Term {id: termID})
+      MERGE (s)-[:INCLUDES]->(t))
+    FOREACH (trID IN split(row.translations, ',') |
+      MERGE (tr:Translation {id: trID})
+      MERGE (s)-[:INCLUDES]->(tr))
    `,
 ];
 const schemaSession = driver.session();

@@ -1,6 +1,6 @@
 const Action = require('../../core/action');
 
-class SeriesQuery extends Action {
+class SetsQuery extends Action {
   async run() {
     const { driver, user } = this.context;
     const session = driver.session();
@@ -8,7 +8,7 @@ class SeriesQuery extends Action {
 
     try {
       const { records } = await session.run(`
-        MATCH (u:User)-[:OWNS]->(p:Profile)<-[:INCLUDES]-(:Active), (p)-[:INCLUDES]->(s:Series) WHERE u.id=$uid
+        MATCH (u:User)-[:OWNS]->(p:Profile)<-[:INCLUDES]-(:Active), (p)-[:INCLUDES]->(s:Set) WHERE u.id=$uid
         RETURN s
       `, params);
 
@@ -21,4 +21,4 @@ class SeriesQuery extends Action {
   }
 }
 
-module.exports = SeriesQuery;
+module.exports = SetsQuery;

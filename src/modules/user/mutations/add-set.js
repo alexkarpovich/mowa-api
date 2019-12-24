@@ -2,7 +2,7 @@ const uuid = require('uuid/v4');
 
 const Action = require('../../core/action');
 
-class AddSeries extends Action {
+class AddSet extends Action {
   async run() {
     const { name } = this.args;
     const { driver, user } = this.context;
@@ -12,15 +12,15 @@ class AddSeries extends Action {
     try {
       const { records } = await session.run(`
         MATCH (u:User)-[:OWNS]->(p:Profile)<-[:INCLUDES]-(:Active) WHERE u.id=$uid
-        CREATE (p)-[:INCLUDES]->(s:Series {id: $id, name: $name})
+        CREATE (p)-[:INCLUDES]->(s:Set {id: $id, name: $name})
         RETURN s
       `, params);
 
-      const series = records[0].get('s').properties;
+      const sets = records[0].get('s').properties;
 
-      console.log(series);
+      console.log(sets);
 
-      return series;
+      return sets;
     } catch (err) {
       console.log(err);
       throw err;
@@ -30,4 +30,4 @@ class AddSeries extends Action {
   }
 }
 
-module.exports = AddSeries;
+module.exports = AddSet;

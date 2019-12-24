@@ -13,7 +13,7 @@ module.exports = gql`
 
   type Query {
     profiles: [Profile!]!
-    series: [Series!]!
+    sets: [Set!]!
     searchTranslations(value: String!): [Translation!]!
   }
 
@@ -21,9 +21,7 @@ module.exports = gql`
     signup(input: UserCreateInput!) : AuthPayload!
     login(email: String!, password: String!) : AuthPayload!
     addProfile(input: AddProfileInput!) : Profile!
-    addSeries(name: String!) : Series!
-    attachTranslation(input: AttachTranslationInput!) : Translation!
-    detachTranslation(seriesId: ID!, translationId: ID!) : Boolean!
+    addSet(name: String!) : Set!
   }
 
   input UserCreateInput {
@@ -35,13 +33,5 @@ module.exports = gql`
     name: String!
     learnLang: String!
     transLang: String!
-  }
-
-  input AttachTranslationInput {
-    seriesId: ID!
-    termId: ID!
-    value: String!
-    transcription: String
-    details: String
   }
 `;
