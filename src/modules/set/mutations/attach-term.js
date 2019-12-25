@@ -18,7 +18,7 @@ class AttachTerm extends Action {
         RETURN term
       `, params);
 
-      return records[0].get('t').properties;
+      return records[0].get('term').properties;
     } catch (err) {
       console.log(err);
       throw err;

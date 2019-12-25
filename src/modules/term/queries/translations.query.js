@@ -2,19 +2,22 @@ const Action = require('../../core/action');
 
 class TranslationsQuery extends Action {
   async run() {
-
-    console.log("HELLO", this.parent);
+    const { id:setId } = this.info.variableValues;
+    const { id:termId } = this.parent;
     const { driver } = this.context;
-    const { id } = this.args;
+
     const session = driver.session();
 
     try {
       const { records } = await session.run(`
-        MATCH (s:Set)-[:INCLUDES]->(t:Term) WHERE s.id=$id
-        RETURN t
-      `, { id });
+        match
+          (t:Term {id: $termId}),
+          (s:Set{id: $setId})<-[:INCLUDES]-(p:Profile)-[:HAS_TRANSLATION_LANG]->(transLang),
+          (t)<-[:FROM]-(trans:Translation)-[:TO]->(transTerm:Term)<-[:INCLUDES]-(transLang)
+        RETURN trans,transTerm
+      `, { termId, setId });
 
-      return [];
+      return records.map(rec => ({ ...rec.get('trans').properties, value: rec.get('transTerm').properties.value}));
     } catch (err) {
       throw err;
     } finally {

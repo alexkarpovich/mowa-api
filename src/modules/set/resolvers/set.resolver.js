@@ -1,4 +1,5 @@
 const TermsQuery = require('../queries/terms.query');
+const CountQuery = require('../queries/count.query');
 const EditSet = require('../mutations/edit');
 const DeleteSet = require('../mutations/delete');
 const AttachTerm = require('../mutations/attach-term');
@@ -26,6 +27,7 @@ module.exports = {
       DetachTranslation.exec({ parent, args, context, info }),
   },
   Set: {
-    count: (parent, args, context, info) => 0
+    count: (parent, args, context, info) =>
+      CountQuery.exec({ parent, args, context, info }),
   }
 };

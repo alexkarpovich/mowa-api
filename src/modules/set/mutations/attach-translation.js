@@ -19,15 +19,13 @@ class AttachTranslation extends Action {
           (p:Profile)-[:INCLUDES]->(s:Set {id: $setId}),
           (learnLang:Language)<-[:HAS_LEARNING_LANG]-(p)-[:HAS_TRANSLATION_LANG]->(transLang:Language),
           (t:Term {id: $termId})
-        MERGE (t)<-[:FROM]-(tr:Translation {transcription: $transcription, details: $details})-[:TO]->(trt:Term {value: $value})<-[:INCLUDES]-(transLang)
-          ON CREATE SET tr.id=$id, trt.id=$newTermId
-        MERGE (s)-[:INCLUDES]->(tr)
-        RETURN tr
+        MERGE (t)<-[:FROM]-(trans:Translation {transcription: $transcription, details: $details})-[:TO]->(transTerm:Term {value: $value})<-[:INCLUDES]-(transLang)
+          ON CREATE SET trans.id=$id, transTerm.id=$newTermId
+        MERGE (s)-[:INCLUDES]->(trans)
+        RETURN trans, transTerm
       `, params);
 
-      const translation = records[0].get('tr').properties;
-
-      return { ...translation };
+      return { ...records[0].get('trans').properties, value: records[0].get('transTerm').properties.value };
     } catch (err) {
       console.log(err);
       throw err;
