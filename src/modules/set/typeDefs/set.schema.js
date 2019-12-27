@@ -17,7 +17,14 @@ module.exports = gql`
     attachTerm(id: ID!, value: String) : Term!
     detachTerm(id: ID!, termId: ID!) : ID!
     attachTranslation(input: AttachTranslationInput!) : Translation!
+    attachExistingTranslation(input: AttachExistingTranslationInput!) : Boolean!
     detachTranslation(setId: ID!, translationId: ID!) : Boolean!
+  }
+
+  input AttachExistingTranslationInput {
+    setId: ID!
+    termId: ID!
+    id: ID!
   }
 
   input AttachTranslationInput {

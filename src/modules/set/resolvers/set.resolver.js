@@ -5,6 +5,7 @@ const DeleteSet = require('../mutations/delete');
 const AttachTerm = require('../mutations/attach-term');
 const DetachTerm = require('../mutations/detach-term');
 const AttachTranslation = require('../mutations/attach-translation');
+const AttachExistingTranslation = require('../mutations/attach-existing-translation');
 const DetachTranslation = require('../mutations/detach-translation');
 
 module.exports = {
@@ -23,6 +24,8 @@ module.exports = {
       DetachTerm.exec({ parent, args, context, info }),
     attachTranslation: (parent, args, context, info) =>
       AttachTranslation.exec({ parent, args, context, info }),
+    attachExistingTranslation: (parent, args, context, info) =>
+      AttachExistingTranslation.exec({ parent, args, context, info }),
     detachTranslation: (parent, args, context, info) =>
       DetachTranslation.exec({ parent, args, context, info }),
   },

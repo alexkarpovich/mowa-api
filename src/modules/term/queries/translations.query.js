@@ -10,14 +10,25 @@ class TranslationsQuery extends Action {
 
     try {
       const { records } = await session.run(`
-        match
+        MATCH
           (t:Term {id: $termId}),
-          (s:Set{id: $setId})<-[:INCLUDES]-(p:Profile)-[:HAS_TRANSLATION_LANG]->(transLang),
-          (t)<-[:FROM]-(trans:Translation)-[:TO]->(transTerm:Term)<-[:INCLUDES]-(transLang)
-        RETURN trans,transTerm
+          (s:Set{id: $setId})<-[:INCLUDES]-(p:Profile)-[:HAS_TRANSLATION_LANG]->(transLang)
+        OPTIONAL MATCH
+          (s)-[:INCLUDES]->(trans:Translation)-[:TO]->(transTerm:Term)<-[:INCLUDES]-(transLang), (t)<-[:FROM]-(trans)
+        RETURN
+          CASE trans.id
+            WHEN null THEN null
+            ELSE {
+              id: trans.id,
+              value: transTerm.value,
+              transcription: trans.transcription,
+              details: trans.details
+            }
+          END as translation
       `, { termId, setId });
 
-      return records.map(rec => ({ ...rec.get('trans').properties, value: rec.get('transTerm').properties.value}));
+      return records.filter(rec => rec.get('translation'))
+                    .map(rec => rec.get('translation'));
     } catch (err) {
       throw err;
     } finally {
