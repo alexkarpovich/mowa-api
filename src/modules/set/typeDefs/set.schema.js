@@ -8,7 +8,7 @@ module.exports = gql`
   }
 
   type Query {
-    terms(id: ID!): [Term!]!
+    terms(ids: [ID!]!): [Term!]!
   }
 
   type Mutation {
@@ -17,7 +17,6 @@ module.exports = gql`
     attachTerm(id: ID!, value: String) : Term!
     detachTerm(id: ID!, termId: ID!) : ID!
     attachTranslation(input: AttachTranslationInput!) : Translation!
-    attachExistingTranslation(input: AttachExistingTranslationInput!) : Boolean!
     detachTranslation(setId: ID!, translationId: ID!) : Boolean!
   }
 
@@ -30,7 +29,8 @@ module.exports = gql`
   input AttachTranslationInput {
     setId: ID!
     termId: ID!
-    value: String!
+    id: ID
+    value: String
     transcription: String
     details: String
   }

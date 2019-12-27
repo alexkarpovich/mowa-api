@@ -2,7 +2,7 @@ const Action = require('../../core/action');
 
 class TranslationsQuery extends Action {
   async run() {
-    const { id:setId } = this.info.variableValues;
+    const { ids:setIds } = this.info.variableValues;
     const { id:termId } = this.parent;
     const { driver } = this.context;
 
@@ -12,9 +12,11 @@ class TranslationsQuery extends Action {
       const { records } = await session.run(`
         MATCH
           (t:Term {id: $termId}),
-          (s:Set{id: $setId})<-[:INCLUDES]-(p:Profile)-[:HAS_TRANSLATION_LANG]->(transLang)
+          (s:Set)<-[:INCLUDES]-(p:Profile)-[:HAS_TRANSLATION_LANG]->(transLang)
+        WHERE s.id IN $setIds
         OPTIONAL MATCH
           (s)-[:INCLUDES]->(trans:Translation)-[:TO]->(transTerm:Term)<-[:INCLUDES]-(transLang), (t)<-[:FROM]-(trans)
+        WITH DISTINCT trans, transTerm
         RETURN
           CASE trans.id
             WHEN null THEN null
@@ -25,7 +27,7 @@ class TranslationsQuery extends Action {
               details: trans.details
             }
           END as translation
-      `, { termId, setId });
+      `, { termId, setIds });
 
       return records.filter(rec => rec.get('translation'))
                     .map(rec => rec.get('translation'));

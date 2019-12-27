@@ -3,29 +3,61 @@ const uuid = require('uuid/v4');
 const Action = require('../../core/action');
 
 class AttachTranslation extends Action {
-  async run() {
+  async attachNewTranslation(session) {
     const { input } = this.args;
-    const { driver } = this.context;
-    const session = driver.session();
     const params = {
       ...input,
       id: uuid(),
       newTermId: uuid()
     };
 
-    try {
-      const { records } = await session.run(`
+    return session.run(`
         MATCH
           (p:Profile)-[:INCLUDES]->(s:Set {id: $setId}),
           (learnLang:Language)<-[:HAS_LEARNING_LANG]-(p)-[:HAS_TRANSLATION_LANG]->(transLang:Language),
           (t:Term {id: $termId})
-        MERGE (t)<-[:FROM]-(trans:Translation {transcription: $transcription, details: $details})-[:TO]->(transTerm:Term {value: $value})<-[:INCLUDES]-(transLang)
-          ON CREATE SET trans.id=$id, transTerm.id=$newTermId
+        MERGE (transTerm:Term {value: $value})<-[:INCLUDES]-(transLang)
+          ON CREATE SET transTerm.id=$newTermId
+        MERGE (t)<-[:FROM]-(trans:Translation {transcription: $transcription, details: $details})-[:TO]->(transTerm)
+          ON CREATE SET trans.id=$id
         MERGE (s)-[:INCLUDES]->(trans)
-        RETURN trans, transTerm
+        RETURN {
+          id: trans.id,
+          value: transTerm.value,
+          transcription: trans.transcription,
+          details: trans.details
+        } as translation
       `, params);
+  }
 
-      return { ...records[0].get('trans').properties, value: records[0].get('transTerm').properties.value };
+  async attachExistingTranslation(session) {
+    const { input } = this.args;
+
+    return session.run(`
+        MATCH
+          (s:Set {id: $setId}),
+          (trans:Translation{id: $id})-[:TO]->(transTerm:Term)
+        MERGE (s)-[:INCLUDES]->(trans)
+        RETURN {
+          id: trans.id,
+          value: transTerm.value,
+          transcription: trans.transcription,
+          details: trans.details
+        } as translation
+      `, input);
+  }
+
+  async run() {
+    const { input } = this.args;
+    const { driver } = this.context;
+    const session = driver.session();
+
+    try {
+      const { records } = input.id ? await this.attachExistingTranslation(session) :
+        await this.attachNewTranslation(session);
+      console.log(records);
+
+      return records[0].get('translation');
     } catch (err) {
       console.log(err);
       throw err;

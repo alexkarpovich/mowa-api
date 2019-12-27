@@ -14,7 +14,7 @@ module.exports = gql`
   type Query {
     profiles: [Profile!]!
     sets: [Set!]!
-    searchTranslations(value: String!): [Translation!]!
+    searchTranslations(termId: ID!, value: String!): [Translation!]!
   }
 
   type Mutation {
