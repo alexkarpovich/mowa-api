@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class CountQuery extends Action {
-  async run() {
+  async response() {
     const { driver } = this.context;
     const { id } = this.parent;
     const session = driver.session();

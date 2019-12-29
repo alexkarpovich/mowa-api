@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class TranscriptionQuery extends Action {
-  async run() {
+  async response() {
     const { ids:setIds } = this.info.variableValues;
     const { id:termId } = this.parent;
     const { driver } = this.context;

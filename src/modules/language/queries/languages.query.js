@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class LanguagesQuery extends Action {
-  async run() {
+  async response() {
     const { driver } = this.context;
     const session = driver.session();
     const res = await session.run('MATCH (lang:Language) RETURN lang');

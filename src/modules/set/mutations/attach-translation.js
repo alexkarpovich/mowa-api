@@ -47,7 +47,7 @@ class AttachTranslation extends Action {
       `, input);
   }
 
-  async run() {
+  async response() {
     const { input } = this.args;
     const { driver } = this.context;
     const session = driver.session();

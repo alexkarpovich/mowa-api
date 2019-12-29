@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class EditSet extends Action {
-  async run() {
+  async response() {
     const { id, name } = this.args;
     const { driver } = this.context;
     const session = driver.session();

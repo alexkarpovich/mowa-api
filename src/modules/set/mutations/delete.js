@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class DeleteSet extends Action {
-  async run() {
+  async response() {
     const { id } = this.args;
     const { driver } = this.context;
     const session = driver.session();

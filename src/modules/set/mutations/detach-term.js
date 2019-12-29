@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class DetachTerm extends Action {
-  async run() {
+  async response() {
     const { id, termId } = this.args;
     const { driver } = this.context;
     const session = driver.session();

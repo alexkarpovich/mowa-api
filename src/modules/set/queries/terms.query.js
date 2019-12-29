@@ -1,7 +1,7 @@
 const Action = require('../../core/action');
 
 class TermsQuery extends Action {
-  async run() {
+  async response() {
     const { driver } = this.context;
     const { ids } = this.args;
     const session = driver.session();

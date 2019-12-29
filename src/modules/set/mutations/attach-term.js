@@ -3,7 +3,7 @@ const uuid = require('uuid/v4');
 const Action = require('../../core/action');
 
 class AttachTerm extends Action {
-  async run() {
+  async response() {
     const { id, value } = this.args;
     const { driver } = this.context;
     const session = driver.session();

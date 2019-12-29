@@ -3,7 +3,7 @@ const uuid = require('uuid/v4');
 const Action = require('../../core/action');
 
 class DetachTranslation extends Action {
-  async run() {
+  async response() {
     const { driver } = this.context;
     const session = driver.session();
 

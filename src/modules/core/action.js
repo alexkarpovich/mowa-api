@@ -8,7 +8,7 @@ class Action {
 
   async response() {
     throw new Error(
-      `Abstract method "getResponse" of class "${this.constructor.name}" should be implemented.`
+      `Abstract method "response" of class "${this.constructor.name}" should be implemented.`
     );
   }
 
