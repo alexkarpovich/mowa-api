@@ -2,7 +2,7 @@ const uuid = require('uuid/v4');
 
 const Action = require('../../core/action');
 
-class EnsureTranslation extends Action {
+class EnsureTraining extends Action {
   async getExisting(session) {
     const { type, setIds } = this.args;
 
@@ -54,4 +54,4 @@ class EnsureTranslation extends Action {
   }
 }
 
-module.exports = EnsureTranslation;
+module.exports = EnsureTraining;
