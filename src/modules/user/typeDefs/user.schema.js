@@ -4,6 +4,7 @@ module.exports = gql`
   type User {
     id: ID!
     email: String!
+    profiles: [Profile!]
   }
 
   type AuthPayload {
@@ -12,6 +13,7 @@ module.exports = gql`
   }
 
   type Query {
+    me : User!
     profiles: [Profile!]!
     sets: [Set!]!
     searchTranslations(termId: ID!, value: String!): [Translation!]!
