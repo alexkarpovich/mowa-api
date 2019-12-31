@@ -4,6 +4,7 @@ const SearchTranslations = require('../queries/search-translations.query');
 const UserSignup = require('../mutations/user-signup');
 const UserLogin = require('../mutations/user-login');
 const AddProfile = require('../mutations/add-profile');
+const ActivateProfile = require('../mutations/activate-profile');
 const AddSet = require('../mutations/add-set');
 
 module.exports = {
@@ -23,6 +24,8 @@ module.exports = {
       UserLogin.exec({ parent, args, context, info }),
     addProfile: (parent, args, context, info) =>
       AddProfile.exec({ parent, args, context, info}),
+    activateProfile: (parent, args, context, info) =>
+      ActivateProfile.exec({ parent, args, context, info }),
     addSet: (parent, args, context, info) =>
       AddSet.exec({ parent, args, context, info }),
   },

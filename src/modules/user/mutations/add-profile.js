@@ -15,16 +15,14 @@ class AddProfile extends Action {
         CREATE (learnLang)<-[:HAS_LEARNING_LANG]-(p:Profile {id: $id, name: $name})-[:HAS_TRANSLATION_LANG]->(transLang),
           (u)-[:OWNS]->(p), (a)-[:INCLUDES]->(p)
         DELETE (ri)
-        RETURN p, learnLang, transLang
+        RETURN {
+          id: p.id,
+          name: p.name,
+          active: EXISTS((p)<-[:INCLUDES]-(:Active))
+        } as profile
       `, params);
 
-      const profile = records[0].get('p').properties;
-      const learnLang = records[0].get('learnLang').properties;
-      const transLang = records[0].get('transLang').properties;
-
-      console.log(profile, learnLang, transLang);
-
-      return { ...profile, learnLang, transLang };
+      return records[0].get('profile');
     } catch (err) {
       console.log(err);
       throw err;

@@ -23,6 +23,7 @@ module.exports = gql`
     signup(input: UserCreateInput!) : AuthPayload!
     login(email: String!, password: String!) : AuthPayload!
     addProfile(input: AddProfileInput!) : Profile!
+    activateProfile(id: ID!) : Boolean!
     addSet(name: String!) : Set!
   }
 

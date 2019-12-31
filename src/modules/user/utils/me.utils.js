@@ -1,12 +1,13 @@
-const { driver } = require('../../../settings/neo4j');
+const driver = require('../../../settings/neo4j');
 
-module.exports = async function me(uid) {
+module.exports.me = async (uid) => {
   const session = driver.session();
 
   try {
     const { records } = await session.run(`
-    MATCH (user:User) WHERE user.id=$uid RETURN user
-  `, { uid });
+      MATCH (user:User) WHERE user.id=$uid RETURN user
+    `, { uid });
+
 
     return records[0].get('user').properties;
   } catch(err) {
@@ -14,4 +15,4 @@ module.exports = async function me(uid) {
   } finally {
     session.close();
   }
-}
+};
