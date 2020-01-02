@@ -9,7 +9,7 @@ const AddSet = require('../mutations/add-set');
 
 module.exports = {
   Query: {
-    me: (parent, args, context, info) => context.user,
+    me: (parent, args, context, info) => context.me,
     profiles: (parent, args, context, info) =>
       ProfilesQuery.exec({ parent, args, context, info }),
     sets: (parent, args, context, info) =>

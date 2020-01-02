@@ -3,9 +3,9 @@ const Action = require('../../core/action');
 class ProfilesQuery extends Action {
   async run() {
     const { id } = this.parent;
-    const { driver, user } = this.context;
+    const { driver, me } = this.context;
     const session = driver.session();
-    const params = { uid: id || user.id };
+    const params = { uid: id || me.id };
 
 
     try {

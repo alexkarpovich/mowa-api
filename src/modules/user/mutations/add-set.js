@@ -5,9 +5,9 @@ const Action = require('../../core/action');
 class AddSet extends Action {
   async run() {
     const { name } = this.args;
-    const { driver, user } = this.context;
+    const { driver, me } = this.context;
     const session = driver.session();
-    const params = { name, id: uuid(), uid: user.id };
+    const params = { name, id: uuid(), uid: me.id };
 
     try {
       const { records } = await session.run(`

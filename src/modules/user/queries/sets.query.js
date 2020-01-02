@@ -2,9 +2,9 @@ const Action = require('../../core/action');
 
 class SetsQuery extends Action {
   async run() {
-    const { driver, user } = this.context;
+    const { driver, me } = this.context;
     const session = driver.session();
-    const params = { uid: user.id };
+    const params = { uid: me.id };
 
     try {
       const { records } = await session.run(`

@@ -2,9 +2,10 @@ const Action = require('../../core/action');
 
 class TranscriptionQuery extends Action {
   async response() {
-    const { ids:setIds } = this.info.variableValues;
+    const { ids:setIds, id } = this.info.variableValues;
     const { id:termId } = this.parent;
     const { driver } = this.context;
+    const params = { setIds: setIds || [id], termId };
 
     const session = driver.session();
 
@@ -16,7 +17,7 @@ class TranscriptionQuery extends Action {
           (t)<-[:FROM]-(trans:Translation)-[:TO]->(transTerm:Term)<-[:INCLUDES]-(transLang)
         WHERE s.id IN $setIds
         RETURN collect(distinct trans.transcription) as transcriptions
-      `, { termId, setIds });
+      `, params);
 
       return records[0].get('transcriptions').join(', ');
     } catch (err) {

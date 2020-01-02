@@ -40,30 +40,30 @@ const dataUpdates = [
     MERGE (u)-[:OWNS]->(p:Profile{id: row.id, name: row.name})<-[:INCLUDES]-(a)
     MERGE (tr)<-[:HAS_TRANSLATION_LANG]-(p)-[:HAS_LEARNING_LANG]->(l)
   `,
-  `
-    LOAD CSV WITH HEADERS FROM 'file:///seeds/terms.csv' AS row
-    MATCH (l:Language) WHERE l.code=row.lang
-    MERGE (l)-[:INCLUDES]->(t:Term {id: row.id, value: row.value})
-  `,
-  `
-    LOAD CSV WITH HEADERS FROM 'file:///seeds/translations.csv' AS row
-    MATCH (ll:Language), (tl:Language), (ll)-[:INCLUDES]->(ft:Term), (tl)-[:INCLUDES]->(tt:Term)
-      WHERE ll.code=row.llang and tl.code=row.tlang and ft.value=row.from and tt.value=row.to
-    MERGE (ft)<-[:FROM]-(tr:Translation {id: row.id, transcription: row.transcription, details: row.details})-[:TO]->(tt)
-  `,
-  `
-    LOAD CSV WITH HEADERS FROM 'file:///seeds/sets.csv' AS row
-    MATCH (p:Profile {id: row.profile})
-    MERGE (s:Set {id: row.id, name: row.name})
-    MERGE (s)<-[:INCLUDES]-(p)
-    WITH row, s
-    FOREACH (termID IN split(row.terms, ',') |
-      MERGE (t:Term {id: termID})
-      MERGE (s)-[:INCLUDES]->(t))
-    FOREACH (trID IN split(row.translations, ',') |
-      MERGE (tr:Translation {id: trID})
-      MERGE (s)-[:INCLUDES]->(tr))
-   `,
+  // `
+  //   LOAD CSV WITH HEADERS FROM 'file:///seeds/terms.csv' AS row
+  //   MATCH (l:Language) WHERE l.code=row.lang
+  //   MERGE (l)-[:INCLUDES]->(t:Term {id: row.id, value: row.value})
+  // `,
+  // `
+  //   LOAD CSV WITH HEADERS FROM 'file:///seeds/translations.csv' AS row
+  //   MATCH (ll:Language), (tl:Language), (ll)-[:INCLUDES]->(ft:Term), (tl)-[:INCLUDES]->(tt:Term)
+  //     WHERE ll.code=row.llang and tl.code=row.tlang and ft.value=row.from and tt.value=row.to
+  //   MERGE (ft)<-[:FROM]-(tr:Translation {id: row.id, transcription: row.transcription, details: row.details})-[:TO]->(tt)
+  // `,
+  // `
+  //   LOAD CSV WITH HEADERS FROM 'file:///seeds/sets.csv' AS row
+  //   MATCH (p:Profile {id: row.profile})
+  //   MERGE (s:Set {id: row.id, name: row.name})
+  //   MERGE (s)<-[:INCLUDES]-(p)
+  //   WITH row, s
+  //   FOREACH (termID IN split(row.terms, ',') |
+  //     MERGE (t:Term {id: termID})
+  //     MERGE (s)-[:INCLUDES]->(t))
+  //   FOREACH (trID IN split(row.translations, ',') |
+  //     MERGE (tr:Translation {id: trID})
+  //     MERGE (s)-[:INCLUDES]->(tr))
+  //  `,
 ];
 const schemaSession = driver.session();
 const dataSession = driver.session();

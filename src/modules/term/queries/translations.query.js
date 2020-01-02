@@ -2,9 +2,10 @@ const Action = require('../../core/action');
 
 class TranslationsQuery extends Action {
   async response() {
-    const { ids:setIds } = this.info.variableValues;
+    const { ids:setIds, id } = this.info.variableValues;
     const { id:termId } = this.parent;
     const { driver } = this.context;
+    const params = { setIds: setIds || [id], termId };
 
     const session = driver.session();
 
@@ -27,7 +28,7 @@ class TranslationsQuery extends Action {
               details: trans.details
             }
           END as translation
-      `, { termId, setIds });
+      `, params);
 
       return records.filter(rec => rec.get('translation'))
                     .map(rec => rec.get('translation'));

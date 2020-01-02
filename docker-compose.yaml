@@ -28,7 +28,8 @@ services:
       - "7474:7474"
       - "7687:7687"
     volumes:
-    - ./src/seeds/data:/var/lib/neo4j/import/seeds
+      - ./data:/data
+      - ./src/seeds/data:/var/lib/neo4j/import/seeds
     environment:
       NEO4J_AUTH: neo4j/root
       NEO4J_dbms_logs_debug_level: DEBUG

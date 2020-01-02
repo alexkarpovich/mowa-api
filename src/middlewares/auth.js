@@ -10,9 +10,9 @@ module.exports = async (req, res, next) => {
 
     const user = await me(decoded.uid);
 
-    req.user = user || null;
+    req.me = user || null;
   } catch (err) {
-    req.user = null;
+    req.me = null;
   }
 
   next()

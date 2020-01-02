@@ -3,9 +3,9 @@ const Action = require('../../core/action');
 class SearchTranslations extends Action {
   async run() {
     const { termId, value } = this.args;
-    const { driver, user } = this.context;
+    const { driver, me } = this.context;
     const session = driver.session();
-    const params = { value, termId, uid: user.id };
+    const params = { value, termId, uid: me.id };
 
     try {
       const { records } = await session.run(`

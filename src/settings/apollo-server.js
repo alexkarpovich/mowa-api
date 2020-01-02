@@ -19,7 +19,7 @@ module.exports = app => {
         schema,
         context: ({req}) => ({
             driver: neo4jdriver,
-            user: req.user,
+            me: req.me,
         }),
     });
 

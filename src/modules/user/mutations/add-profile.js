@@ -5,9 +5,9 @@ const Action = require('../../core/action');
 class AddProfile extends Action {
   async run() {
     const { input } = this.args;
-    const { driver, user } = this.context;
+    const { driver, me } = this.context;
     const session = driver.session();
-    const params = { ...input, id: uuid(), uid: user.id };
+    const params = { ...input, id: uuid(), uid: me.id };
 
     try {
       const { records } = await session.run(`
