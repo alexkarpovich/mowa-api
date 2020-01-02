@@ -7,6 +7,7 @@ class AttachTranslation extends Action {
     const { input } = this.args;
     const params = {
       ...input,
+      value: input.value.trim(),
       id: uuid(),
       newTermId: uuid()
     };

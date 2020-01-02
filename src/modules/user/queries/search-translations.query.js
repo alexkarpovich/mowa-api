@@ -15,6 +15,7 @@ class SearchTranslations extends Action {
           (transTerm)<-[:TO]-(tr:Translation)-[:FROM]->(:Term{id: $termId})<-[:INCLUDES]-(learnLang)
         WHERE transTerm.value CONTAINS $value
         RETURN tr, transTerm
+        LIMIT 10
       `, params);
 
       return records.map(rec => ({ ...rec.get('tr').properties, value: rec.get('transTerm').properties.value}));
