@@ -16,5 +16,8 @@
     "uri": "bolt://neo4j:7687",
     "user": "neo4j",
     "password": "root"
+  },
+  "selenium": {
+    "uri": "http://localhost:4444/wd/hub"
   }
 }
