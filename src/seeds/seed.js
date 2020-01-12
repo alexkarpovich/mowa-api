@@ -1,4 +1,4 @@
-const driver = require('../settings/neo4j');
+const driver = require('../libs/neo4j');
 
 console.log('SEED DB START');
 

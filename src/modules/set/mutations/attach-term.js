@@ -5,7 +5,7 @@ const Action = require('../../core/action');
 class AttachTerm extends Action {
   async response() {
     const { id, value } = this.args;
-    const { driver } = this.context;
+    const { driver, mq } = this.context;
     const session = driver.session();
     const params = { id, termId: uuid(), value };
 
@@ -17,6 +17,8 @@ class AttachTerm extends Action {
         MERGE (s)-[:INCLUDES]->(term)
         RETURN term
       `, params);
+
+      await mq.publishTerm(value);
 
       return records[0].get('term').properties;
     } catch (err) {

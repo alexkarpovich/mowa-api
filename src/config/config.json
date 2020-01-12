@@ -9,6 +9,9 @@
   "redis": {
       "uri": "redis://redis:6379"
   },
+  "rabbitmq": {
+    "uri": "amqp://root:root@rabbitmq:5672"
+  },
   "apollo": {
     "path": "/api"
   },
@@ -18,6 +21,6 @@
     "password": "root"
   },
   "selenium": {
-    "uri": "http://localhost:4444/wd/hub"
+    "uri": "http://hub:4444/wd/hub"
   }
 }

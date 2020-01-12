@@ -5,17 +5,26 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: npm run dev
+    command: bash /usr/script/api.start.sh
     working_dir: /usr/app
     environment:
       MIGRATE_dbConnectionUri: mongodb://mongo:27017/dev
+      RABBITMQ_HOST: rabbitmq
     ports:
       - "4000:4000"
     volumes:
       - ./src:/usr/app/src
-    links:
+      - ./api.start.sh:/usr/script/api.start.sh
+    depends_on:
+      - hub
       - neo4j
       - redis
+      - rabbitmq
+    links:
+      - hub
+      - neo4j
+      - redis
+      - rabbitmq
 
   redis:
     image: redis
@@ -36,6 +45,12 @@ services:
 
   rabbitmq:
     image: "rabbitmq:3-management"
+    tty: true
+    environment:
+      RABBITMQ_ERLANG_COOKIE: 6085e2412b6fa88647466c6a81c0cea0
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+      RABBITMQ_DEFAULT_VHOST: /
     ports:
       - "5672:5672"
       - "15672:15672"
