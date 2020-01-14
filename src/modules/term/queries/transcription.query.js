@@ -19,7 +19,7 @@ class TranscriptionQuery extends Action {
         RETURN collect(distinct trans.transcription) as transcriptions
       `, params);
 
-      return records[0].get('transcriptions').join(', ');
+      return records[0].get('transcriptions');
     } catch (err) {
       throw err;
     } finally {

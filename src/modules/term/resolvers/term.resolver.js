@@ -5,7 +5,7 @@ module.exports = {
   Term: {
     translations: (parent, args, context, info) =>
       TranslationsQuery.exec({ parent, args, context, info }),
-    transcription: (parent, args, context, info) =>
+    transcriptions: (parent, args, context, info) =>
       TranscriptionQuery.exec({ parent, args, context, info }),
   }
 };

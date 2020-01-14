@@ -5,6 +5,6 @@ module.exports = gql`
     id: ID!
     value: String!
     translations: [Translation!]
-    transcription: String
+    transcriptions: [String!]
   }
 `;
