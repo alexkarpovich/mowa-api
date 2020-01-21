@@ -11,11 +11,22 @@ class ProfilesQuery extends Action {
     try {
       const { records } = await session.run(`
         match (u:User{id: $uid}),
-        (u)-[:OWNS]->(p:Profile)
+          (u)-[:OWNS]->(p:Profile),
+          (learn:Language)<-[:HAS_LEARNING_LANG]-(p)-[:HAS_TRANSLATION_LANG]->(trans:Language)
         RETURN collect({
           id: p.id,
           name: p.name,
-          active: EXISTS((p)<-[:INCLUDES]-(:Active))
+          active: EXISTS((p)<-[:INCLUDES]-(:Active)),
+          learnLang: {
+            id: learn.id,
+            code: learn.code,
+            name: learn.name
+          },
+          transLang: {
+            id: trans.id,
+            code: trans.code,
+            name: trans.name
+          }
         }) as profiles
       `, params);
 
