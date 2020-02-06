@@ -26,6 +26,23 @@ class TrainingCycles extends Training {
     return records.map(rec => rec.get('id'));
   }
 
+  async buildStages(session, trainingId, stages) {
+    const { records } = session.run(`
+      MATCH (train:Training{id: $trainingId})
+      UNWIND range(0, size($stages)-1) as sid
+      WITH $stages[sid] as cycles, sid
+      CREATE (train)-[:INCLUDE]->(st:Stage)
+      UNWIND cycles as cycle
+      FOREACH(transId IN cycle |
+        MATCH (trans:Translation{id: transId})
+        CREATE (st)-[:INCLUDE]->(trans)
+      )
+
+    `, { trainingId, stages });
+
+    return records.map(rec => rec.get('id'));
+  }
+
   async initialize() {
     const session = this.driver.session();
 
