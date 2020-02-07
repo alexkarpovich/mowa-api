@@ -9,7 +9,7 @@ class TrainingCycles extends Training {
   }
 
   async countTranslations(session, trainingId) {
-    const { records } = session.run(`
+    const { records } = await session.run(`
         MATCH (train:Training{id: $trainingId})-[:INCLUDES]->(s:Set)-[:INCLUDE]->(trans:Translation)
         RETURN COUNT(DISTINCT trans) as count
       `, { trainingId });
@@ -18,26 +18,37 @@ class TrainingCycles extends Training {
   }
 
   async getTranslationIds(session, trainingId) {
-    const { records } = session.run(`
+    const { records } = await session.run(`
       MATCH (train:Training{id: $trainingId})-[:INCLUDES]->(s:Set)-[:INCLUDES]->(trans:Translation)
-      WITH DISTINCT trans.id as id
+      RETURN DISTINCT trans.id as id
     `, { trainingId });
 
     return records.map(rec => rec.get('id'));
   }
 
   async buildStages(session, trainingId, stages) {
-    const { records } = session.run(`
+    const { records } = await session.run(`
       MATCH (train:Training{id: $trainingId})
       UNWIND range(0, size($stages)-1) as sid
-      WITH $stages[sid] as cycles, sid
-      CREATE (train)-[:INCLUDE]->(st:Stage)
-      UNWIND cycles as cycle
-      FOREACH(transId IN cycle |
-        MATCH (trans:Translation{id: transId})
-        CREATE (st)-[:INCLUDE]->(trans)
+      OPTIONAL MATCH (train)-[:INCLUDES]->(pst:Stage{level: sid})
+      WITH train, $stages[sid] as cycles, sid, pst
+      MERGE (train)-[:INCLUDES]->(st:Stage{level: sid+1})
+        ON CREATE SET st.prev = CASE sid WHEN 0 THEN [] ELSE [sid] END,
+          st.active = CASE sid WHEN 0 THEN [1] ELSE [0] END
+      FOREACH(i IN st.active |
+        MERGE (:Active)-[:INCLUDES]->(st)
+        REMOVE st.active
       )
-
+      FOREACH(i IN st.prev |
+        MERGE (pst)-[:NEXT]->(st)
+        REMOVE st.prev
+      )
+      WITH st, cycles
+      UNWIND cycles as cycle
+      WITH st, cycle
+      UNWIND cycle as transId
+      MATCH (trans:Translation{id: transId})
+      MERGE (st)-[:INCLUDES]->(trans)
     `, { trainingId, stages });
 
     return records.map(rec => rec.get('id'));
@@ -46,20 +57,21 @@ class TrainingCycles extends Training {
   async initialize() {
     const session = this.driver.session();
 
-    try {
-      let training = await this.matchExisting(session);
+    let training = await this.matchExisting(session);
 
-      if (training) {
-        return training;
-      }
+    if (training) {
+      return training;
+    }
 
-      training = await this.assignSets(session);
-      const transIds = await this.getTranslationIds(session, training.id);
+    console.log(training);
+
+    return session.readTransaction(async (txc) => {
+      training = await this.assignSets(txc);
+      const transIds = await this.getTranslationIds(txc, training.id);
       const count = transIds.length;
       const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2));
       let stages = Array.from(Array(stageCount).keys());
 
-      console.log(count, stageCount);
       let ids, chunkSize;
 
       stages = stages.map((k) => {
@@ -69,15 +81,12 @@ class TrainingCycles extends Training {
         return chunkSize ? chunk(ids, chunkSize) : ids;
       });
 
-      console.log(stages);
+      await this.buildStages(txc, training.id, stages);
 
       return training;
-    } catch (err) {
-      console.log(err);
-      throw err;
-    } finally {
-      session.close();
-    }
+    }).then(training => training)
+      .catch(e => console.log(e))
+      .finally(() => session.close());
   }
 }
 
