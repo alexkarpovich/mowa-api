@@ -28,27 +28,25 @@ class TrainingCycles extends Training {
 
   async buildStages(session, trainingId, stages) {
     const { records } = await session.run(`
-      MATCH (train:Training{id: $trainingId})
+      MATCH (train:Training{id: $trainingId}), (active:Active)
       UNWIND range(0, size($stages)-1) as sid
-      OPTIONAL MATCH (train)-[:INCLUDES]->(pst:Stage{level: sid})
-      WITH train, $stages[sid] as cycles, sid, pst
-      MERGE (train)-[:INCLUDES]->(st:Stage{level: sid+1})
-        ON CREATE SET st.prev = CASE sid WHEN 0 THEN [] ELSE [sid] END,
-          st.active = CASE sid WHEN 0 THEN [1] ELSE [0] END
-      FOREACH(i IN st.active |
-        MERGE (:Active)-[:INCLUDES]->(st)
-        REMOVE st.active
+      WITH train, $stages[sid] as cycles, sid
+      MERGE (train)-[:INCLUDES]->(stage:Stage{id: sid+1})
+        ON CREATE SET stage.prev = CASE sid WHEN 0 THEN [] ELSE [sid] END,
+          stage.active = CASE sid WHEN 0 THEN [1] ELSE [] END
+      FOREACH(i IN stage.active |
+        MERGE (active)-[:INCLUDES]->(stage)
       )
-      FOREACH(i IN st.prev |
-        MERGE (pst)-[:NEXT]->(st)
-        REMOVE st.prev
-      )
-      WITH st, cycles
-      UNWIND cycles as cycle
-      WITH st, cycle
-      UNWIND cycle as transId
+      REMOVE stage.prev
+      REMOVE stage.active
+      WITH stage, cycles
+      UNWIND range(0, size(cycles)-1) as cid
+      WITH stage, cid, cycles[cid] as translations
+      MERGE (stage)-[:INCLUDES]->(cycle:Cycle{id: cid+1})
+      WITH cycle, translations
+      UNWIND translations as transId
       MATCH (trans:Translation{id: transId})
-      MERGE (st)-[:INCLUDES]->(trans)
+      MERGE (cycle)-[:INCLUDES]->(trans)
     `, { trainingId, stages });
 
     return records.map(rec => rec.get('id'));
@@ -69,17 +67,21 @@ class TrainingCycles extends Training {
       training = await this.assignSets(txc);
       const transIds = await this.getTranslationIds(txc, training.id);
       const count = transIds.length;
-      const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2));
+      const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2)) + 1;
       let stages = Array.from(Array(stageCount).keys());
 
-      let ids, chunkSize;
+      let ids, chunkSize, rate;
 
       stages = stages.map((k) => {
         ids = shuffle(transIds);
-        chunkSize = count / (MIN_CHUNK_SIZE * Math.pow(2, k));
+        rate = Math.round(count / (MIN_CHUNK_SIZE * Math.pow(2, k)));
+        chunkSize = Math.round(count / rate);
+        console.log(k, rate, chunkSize);
 
-        return chunkSize ? chunk(ids, chunkSize) : ids;
+        return chunk(ids, chunkSize);
       });
+
+      console.log(count, stages.map(cycles => cycles.length));
 
       await this.buildStages(txc, training.id, stages);
 
