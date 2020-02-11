@@ -51,11 +51,11 @@ class CyclesIterator extends BaseIterator {
   async checkStageCycles(session) {
     const { records } = await session.run(`
       MATCH (train:Training{id: $id})-[:INCLUDES]->(stage:Stage)<-[:INCLUDES]-(active:Active),
-      (stage)-[:INCLUDES]->(cycle:Cycle)<-[rac:INCLUDES]-(active),
-      (cycle)-[:INCLUDES]->(trans:Translation)
-      WHERE NOT (stage)-[:HAS_COMPLETED]->(trans)
+      (stage)-[:INCLUDES]->(cycle:Cycle)<-[rac:INCLUDES]-(active)
       OPTIONAL MATCH (stage)-[:INCLUDES]->(nextCycle:Cycle{id: cycle.id+1})
-      WITH stage, cycle, rac, CASE WHEN EXISTS(trans.id) and EXISTS(nextCycle.id) THEN [1] ELSE [] END as switchCycle
+      OPTIONAL MATCH (cycle)-[:INCLUDES]->(trans:Translation)
+      WHERE NOT (stage)-[:HAS_COMPLETED]->(trans)
+      WITH active, stage, nextCycle, rac, CASE WHEN COUNT(trans)=0 and COUNT(nextCycle)=1 THEN [1] ELSE [] END as switchCycle
       FOREACH(i IN switchCycle |
         MERGE (active)-[:INCLUDES]->(nextCycle)
         DELETE rac
@@ -66,7 +66,9 @@ class CyclesIterator extends BaseIterator {
       RETURN COUNT(availableTrans) as count
     `, { id: this.trainingId });
 
-    return +records[0].get('count')
+    console.log(+records[0].get('count'));
+
+    return !+records[0].get('count')
   }
 
   async complete(translationId) {
@@ -78,7 +80,7 @@ class CyclesIterator extends BaseIterator {
 
       if (isStageComplete) {
         console.log('hello, stage complete');
-        throw new Error('hello');
+        //throw new Error('hello');
       }
 
       return true;
