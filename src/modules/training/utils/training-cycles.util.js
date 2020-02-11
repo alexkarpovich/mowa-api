@@ -30,7 +30,7 @@ class TrainingCycles extends Training {
     const { records } = await session.run(`
       MATCH (train:Training{id: $trainingId}), (active:Active)
       UNWIND range(0, size($stages)-1) as sid
-      WITH train, $stages[sid] as cycles, sid
+      WITH train, active, $stages[sid] as cycles, sid
       MERGE (train)-[:INCLUDES]->(stage:Stage{id: sid+1})
         ON CREATE SET stage.prev = CASE sid WHEN 0 THEN [] ELSE [sid] END,
           stage.active = CASE sid WHEN 0 THEN [1] ELSE [] END
@@ -39,10 +39,15 @@ class TrainingCycles extends Training {
       )
       REMOVE stage.prev
       REMOVE stage.active
-      WITH stage, cycles
+      WITH active, sid, stage, cycles
       UNWIND range(0, size(cycles)-1) as cid
-      WITH stage, cid, cycles[cid] as translations
+      WITH active, sid, stage, cid, cycles[cid] as translations
       MERGE (stage)-[:INCLUDES]->(cycle:Cycle{id: cid+1})
+        ON CREATE SET cycle.active = CASE sid+cid WHEN 0 THEN [1] ELSE [] END
+      FOREACH(i IN cycle.active |
+        MERGE (active)-[:INCLUDES]->(cycle)
+      )
+      REMOVE cycle.active
       WITH cycle, translations
       UNWIND translations as transId
       MATCH (trans:Translation{id: transId})
@@ -61,8 +66,6 @@ class TrainingCycles extends Training {
       return training;
     }
 
-    console.log(training);
-
     return session.readTransaction(async (txc) => {
       training = await this.assignSets(txc);
       const transIds = await this.getTranslationIds(txc, training.id);
@@ -76,7 +79,6 @@ class TrainingCycles extends Training {
         ids = shuffle(transIds);
         rate = Math.round(count / (MIN_CHUNK_SIZE * Math.pow(2, k)));
         chunkSize = Math.round(count / rate);
-        console.log(k, rate, chunkSize);
 
         return chunk(ids, chunkSize);
       });
