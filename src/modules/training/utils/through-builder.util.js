@@ -1,11 +1,12 @@
-const Training = require('./training.util');
+const { TYPE_THROUGH } = require('./constant.util');
+const BaseBuilder = require('./base-builder.util');
 
-class TrainingThrough extends Training {
+class ThroughBuilder extends BaseBuilder {
   constructor(driver, setIds) {
-    super(driver, Training.TYPE_THROUGH, setIds);
+    super(driver, TYPE_THROUGH, setIds);
   }
 
-  async initialize() {
+  async build() {
     const session = this.driver.session();
 
     try {
@@ -27,4 +28,4 @@ class TrainingThrough extends Training {
   }
 }
 
-module.exports = TrainingThrough;
+module.exports = ThroughBuilder;

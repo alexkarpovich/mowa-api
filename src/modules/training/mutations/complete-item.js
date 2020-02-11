@@ -1,23 +1,14 @@
 const Action = require('../../core/action');
+const TrainingIterator = require('../utils/training-iterator.util');
 
 class CompleteItem extends Action {
   async response() {
     const { driver } = this.context;
-    const session = driver.session();
+    const { id, translationId } = this.args;
 
-    try {
-      await session.run(`
-        MATCH (train:Training{id: $id}), (trans:Translation{id: $translationId})
-        MERGE (train)-[:HAS_COMPLETED]->(trans)
-      `, this.args);
+    const iterator = new TrainingIterator(driver, id);
 
-      return true;
-    } catch (err) {
-      console.log(err);
-      throw err;
-    } finally {
-      session.close();
-    }
+    return iterator.complete(translationId);
   }
 }
 

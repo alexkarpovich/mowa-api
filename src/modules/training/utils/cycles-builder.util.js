@@ -1,11 +1,12 @@
 const { chunk, shuffle } = require('lodash');
-const Training = require('./training.util');
+const { TYPE_CYCLES } = require('./constant.util');
+const BaseBuilder = require('./base-builder.util');
 
 const MIN_CHUNK_SIZE = 7;
 
-class TrainingCycles extends Training {
+class CyclesBuilder extends BaseBuilder {
   constructor(driver, setIds) {
-    super(driver, Training.TYPE_CYCLES, setIds);
+    super(driver, TYPE_CYCLES, setIds);
   }
 
   async countTranslations(session, trainingId) {
@@ -57,9 +58,8 @@ class TrainingCycles extends Training {
     return records.map(rec => rec.get('id'));
   }
 
-  async initialize() {
+  async build() {
     const session = this.driver.session();
-
     let training = await this.matchExisting(session);
 
     if (training) {
@@ -88,10 +88,9 @@ class TrainingCycles extends Training {
       await this.buildStages(txc, training.id, stages);
 
       return training;
-    }).then(training => training)
-      .catch(e => console.log(e))
+    }).catch(e => console.log(e))
       .finally(() => session.close());
   }
 }
 
-module.exports = TrainingCycles;
+module.exports = CyclesBuilder;

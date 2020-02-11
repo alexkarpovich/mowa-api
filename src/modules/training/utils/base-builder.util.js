@@ -1,9 +1,6 @@
 const uuid = require('uuid/v4');
 
-class Training {
-  static TYPE_THROUGH = 0;
-  static TYPE_CYCLES = 1;
-
+class BaseBuilder {
   constructor(driver, type, setIds) {
     this.driver = driver;
     this.type = type;
@@ -41,4 +38,4 @@ class Training {
   }
 }
 
-module.exports = Training;
+module.exports = BaseBuilder;

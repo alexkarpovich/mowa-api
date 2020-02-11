@@ -1,5 +1,5 @@
 const Action = require('../../core/action');
-const ensureTraining = require('../utils/ensure-training.util');
+const TrainingBuilder = require('../utils/training-builder.util');
 
 class EnsureTraining extends Action {
 
@@ -7,7 +7,9 @@ class EnsureTraining extends Action {
     const { driver } = this.context;
     const { type, setIds } = this.args;
 
-    return ensureTraining(driver, type, setIds);
+    const builder = new TrainingBuilder(driver, type, setIds);
+
+    return builder.build();
   }
 }
 
