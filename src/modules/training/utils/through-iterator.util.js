@@ -1,8 +1,7 @@
-const BaseIterator = require('./base-iterator.util');
-
-class ThroughIterator extends BaseIterator {
+class ThroughIterator {
   constructor(driver, trainingId) {
-    super(driver, trainingId);
+    this.driver = driver;
+    this.trainingId = trainingId;
   }
 
   async next() {

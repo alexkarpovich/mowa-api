@@ -1,14 +1,14 @@
 const Action = require('../../core/action');
-const TrainingIterator = require('../utils/training-iterator.util');
+const Training = require('../utils/training.util');
 
 class TrainingItem extends Action {
   async response() {
     const { driver } = this.context;
     const { id } = this.args;
 
-    const iterator = new TrainingIterator(driver, id);
+    const training = await Training.init({ driver, id });
 
-    return iterator.next();
+    return training.next();
   }
 }
 

@@ -1,12 +1,11 @@
 const { chunk, shuffle } = require('lodash');
-const { TYPE_CYCLES } = require('./constant.util');
-const BaseBuilder = require('./base-builder.util');
 
 const MIN_CHUNK_SIZE = 7;
 
-class CyclesBuilder extends BaseBuilder {
-  constructor(driver, setIds) {
-    super(driver, TYPE_CYCLES, setIds);
+class CyclesBuilder {
+  constructor(driver, training) {
+    this.driver = driver;
+    this.training = training;
   }
 
   async countTranslations(session, trainingId) {
@@ -60,15 +59,9 @@ class CyclesBuilder extends BaseBuilder {
 
   async build() {
     const session = this.driver.session();
-    let training = await this.matchExisting(session);
-
-    if (training) {
-      return training;
-    }
 
     return session.readTransaction(async (txc) => {
-      training = await this.assignSets(txc);
-      const transIds = await this.getTranslationIds(txc, training.id);
+      const transIds = await this.getTranslationIds(txc, this.training.id);
       const count = transIds.length;
       const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2)) + 1;
       let stages = Array.from(Array(stageCount).keys());
@@ -85,9 +78,9 @@ class CyclesBuilder extends BaseBuilder {
 
       console.log(count, stages.map(cycles => cycles.length));
 
-      await this.buildStages(txc, training.id, stages);
+      await this.buildStages(txc, this.training.id, stages);
 
-      return training;
+      return this.training;
     }).catch(e => console.log(e))
       .finally(() => session.close());
   }

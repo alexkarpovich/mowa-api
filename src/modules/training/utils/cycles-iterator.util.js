@@ -1,8 +1,7 @@
-const BaseIterator = require('./base-iterator.util');
-
-class CyclesIterator extends BaseIterator {
+class CyclesIterator {
   constructor(driver, trainingId) {
-    super(driver, trainingId);
+    this.driver = driver;
+    this.trainingId = trainingId;
   }
 
   async next() {
@@ -49,26 +48,28 @@ class CyclesIterator extends BaseIterator {
   }
 
   async checkStageCycles(session) {
-    const { records } = await session.run(`
-      MATCH (train:Training{id: $id})-[:INCLUDES]->(stage:Stage)<-[:INCLUDES]-(active:Active),
+    await session.run(`
+      MATCH (train:Training{id: $id})-[:INCLUDES]->(stage:Stage)<-[ras:INCLUDES]-(active:Active),
       (stage)-[:INCLUDES]->(cycle:Cycle)<-[rac:INCLUDES]-(active)
       OPTIONAL MATCH (stage)-[:INCLUDES]->(nextCycle:Cycle{id: cycle.id+1})
       OPTIONAL MATCH (cycle)-[:INCLUDES]->(trans:Translation)
       WHERE NOT (stage)-[:HAS_COMPLETED]->(trans)
-      WITH active, stage, nextCycle, rac, CASE WHEN COUNT(trans)=0 and COUNT(nextCycle)=1 THEN [1] ELSE [] END as switchCycle
+      WITH active, train, stage, nextCycle, ras, rac, CASE WHEN COUNT(trans)=0 and COUNT(nextCycle)=1 THEN [1] ELSE [] END as switchCycle
       FOREACH(i IN switchCycle |
         MERGE (active)-[:INCLUDES]->(nextCycle)
         DELETE rac
       )
-      WITH stage
-      MATCH (stage)-[:INCLUDES]->(:Cycle)-[:INCLUDES]->(availableTrans:Translation)
+      WITH active, train, stage, ras, rac
+      OPTIONAL MATCH (train)-[:INCLUDES]->(nextStage:Stage{id: stage.id+1})-[:INCLUDES]->(firstCycle:Cycle{id: 1})
+      OPTIONAL MATCH (stage)-[:INCLUDES]->(:Cycle)-[:INCLUDES]->(availableTrans:Translation)
       WHERE NOT (stage)-[:HAS_COMPLETED]->(availableTrans)
-      RETURN COUNT(availableTrans) as count
+      WITH active, nextStage, firstCycle, ras, rac, CASE WHEN COUNT(availableTrans)=0 and COUNT(nextStage)=1 THEN [1] ELSE [] END as switchStage
+      FOREACH(i IN switchStage |
+        MERGE (nextStage)<-[:INCLUDES]-(active)-[:INCLUDES]->(firstCycle)
+        DELETE ras
+        DELETE rac
+      )
     `, { id: this.trainingId });
-
-    console.log(+records[0].get('count'));
-
-    return !+records[0].get('count')
   }
 
   async complete(translationId) {
@@ -76,12 +77,7 @@ class CyclesIterator extends BaseIterator {
 
     return session.readTransaction(async (txc) => {
       await this.markTranslation(txc, translationId);
-      const isStageComplete = await this.checkStageCycles(txc);
-
-      if (isStageComplete) {
-        console.log('hello, stage complete');
-        //throw new Error('hello');
-      }
+      await this.checkStageCycles(txc);
 
       return true;
 
