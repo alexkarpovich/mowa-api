@@ -1,5 +1,5 @@
 node_modules
-data
+neo4j
 .idea
 .DS_Store
 .vscode

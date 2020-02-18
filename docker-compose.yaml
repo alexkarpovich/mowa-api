@@ -34,14 +34,21 @@ services:
   neo4j:
     image: neo4j:4.0
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7473:7473'
+      - '7687:7687'
     volumes:
-      - ./data:/data
+      - ./neo4j/data:/data
+      - ./neo4j/plugins:/plugins
       - ./src/seeds/data:/var/lib/neo4j/import/seeds
     environment:
-      NEO4J_AUTH: neo4j/root
-      NEO4J_dbms_logs_debug_level: DEBUG
+      - NEO4J_AUTH=neo4j/root
+      - NEO4J_dbms_logs_debug_level=DEBUG
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_shell_enabled=true
 
   rabbitmq:
     image: "rabbitmq:3-management"
