@@ -7,6 +7,7 @@
     "dev:www": "NODE_ENV=development nodemon src/bin/www.js",
     "dev:worker": "NODE_ENV=development nodemon src/bin/worker.js",
     "dev": "concurrently \"npm:dev:www\" \"npm:dev:worker\"",
+    "prod:www": "NODE_ENV=production node src/bin/www.js",
     "seed": "node src/seeds/seed.js"
   },
   "keywords": [],

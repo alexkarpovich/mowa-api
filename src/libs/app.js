@@ -3,7 +3,7 @@ const express = require('express');
 const authMiddleware = require('../middlewares/auth');
 const apolloServer = require('./apollo-server');
 
-require('./redis');
+//require('./redis');
 
 const app = express();
 

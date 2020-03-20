@@ -11,7 +11,9 @@ amqp.connect(config.get('rabbitmq:uri'), function (err, conn) {
     throw new Error(err);
   }
 
-  initProducer(app, conn);
+  if (process.env.NODE_ENV === 'development') {
+    initProducer(app, conn);
+  }
 
   app.listen({port}, () => {
     console.log(`🚀  Server ready at http://localhost:${port}`);

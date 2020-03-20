@@ -26,10 +26,10 @@ class Training {
         MATCH (a:Set)<-[:INCLUDES]-(train)
         WITH train, collect(DISTINCT a.id) as aids
         WHERE ALL(x IN $setIds WHERE x IN aids) AND size(aids) = size($setIds)
-        RETURN train
+        RETURN train.id as id
       `, { type, setIds });
 
-    return records.length ? this.formatResponse(records[0].get('train').properties) : null;
+    return records.length ? records[0].get('id') : null;
   }
 
   /**
@@ -45,14 +45,10 @@ class Training {
         WITH train
         MATCH (s:Set) WHERE s.id IN $setIds
         MERGE (train)-[:INCLUDES]->(s)
-        RETURN train
+        RETURN train.id as id
       `, { type, setIds, id: uuid() });
 
-    return this.formatResponse(records[0].get('train').properties);
-  }
-
-  static formatResponse(data) {
-    return { ...data, type: +data.type };
+    return records[0].get('id');
   }
 
   static async typeById(session, id) {
@@ -71,14 +67,12 @@ class Training {
 
     try {
 
-      if (id === undefined && type !== undefined && setIds !== undefined) {
-        let training = await this.matchExisting(session, type, setIds);
+      if (id === undefined) {
+        id = await this.matchExisting(session, type, setIds);
 
-        if (!training) {
-          training = await this.assignSets(session, type, setIds);
+        if (!id) {
+          id = await this.assignSets(session, type, setIds);
         }
-
-        id = training.id;
       }
 
       if (type === undefined) {
