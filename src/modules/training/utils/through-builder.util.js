@@ -1,10 +1,9 @@
 class ThroughBuilder {
-  constructor(driver) {
-    this.driver = driver;
+  constructor(driver, trainingId) {
   }
 
   async build() {
-    return true;
+
   }
 }
 

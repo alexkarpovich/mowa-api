@@ -1,4 +1,7 @@
 module.exports = {
   TYPE_THROUGH: 0,
-  TYPE_CYCLES: 1
+  TYPE_CYCLES: 1,
+  HANDLER_BUILDER: 0,
+  HANDLER_ITERATOR: 1,
+  HANDLER_META: 2,
 };

@@ -3,18 +3,9 @@ const { chunk, shuffle } = require('lodash');
 const MIN_CHUNK_SIZE = 7;
 
 class CyclesBuilder {
-  constructor(driver, training) {
-    this.driver = driver;
-    this.training = training;
-  }
-
-  async countTranslations(session, trainingId) {
-    const { records } = await session.run(`
-        MATCH (train:Training{id: $trainingId})-[:INCLUDES]->(s:Set)-[:INCLUDE]->(trans:Translation)
-        RETURN COUNT(DISTINCT trans) as count
-      `, { trainingId });
-
-    return +records[0].get('count');
+  constructor(driver, trainingId) {
+    this.driver = driver; // Maybe as Driver as Session
+    this.trainingId = trainingId;
   }
 
   async getTranslationIds(session, trainingId) {
@@ -27,7 +18,7 @@ class CyclesBuilder {
   }
 
   async buildStages(session, trainingId, stages) {
-    const { records } = await session.run(`
+    await session.run(`
       MATCH (train:Training{id: $trainingId}), (active:Active)
       UNWIND range(0, size($stages)-1) as sid
       WITH train, active, $stages[sid] as cycles, sid
@@ -53,36 +44,41 @@ class CyclesBuilder {
       MATCH (trans:Translation{id: transId})
       MERGE (cycle)-[:INCLUDES]->(trans)
     `, { trainingId, stages });
+  }
 
-    return records.map(rec => rec.get('id'));
+  async _buildCallback(txc) {
+    const transIds = await this.getTranslationIds(txc, this.trainingId);
+    const count = transIds.length;
+    const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2)) + 1;
+    let stages = Array.from(Array(stageCount).keys());
+
+    let ids, chunkSize, rate;
+
+    stages = stages.map((k) => {
+      ids = shuffle(transIds);
+      rate = Math.round(count / (MIN_CHUNK_SIZE * Math.pow(2, k)));
+      chunkSize = Math.round(count / rate);
+
+      return chunk(ids, chunkSize);
+    });
+
+    console.log(count, stages.map(cycles => cycles.length));
+
+    await this.buildStages(txc, this.trainingId, stages);
   }
 
   async build() {
-    const session = this.driver.session();
 
-    return session.readTransaction(async (txc) => {
-      const transIds = await this.getTranslationIds(txc, this.training.id);
-      const count = transIds.length;
-      const stageCount = Math.round(Math.log(count * 1. / MIN_CHUNK_SIZE) / Math.log(2)) + 1;
-      let stages = Array.from(Array(stageCount).keys());
+    if (typeof this.driver.session === 'function') {
+      const session = this.driver.session();
 
-      let ids, chunkSize, rate;
+      return session.readTransaction(this._buildCallback.bind(this))
+        .catch(e => console.log(e))
+        .finally(() => session.close());
+    } else {
+      return this._buildCallback(this.driver);
+    }
 
-      stages = stages.map((k) => {
-        ids = shuffle(transIds);
-        rate = Math.round(count / (MIN_CHUNK_SIZE * Math.pow(2, k)));
-        chunkSize = Math.round(count / rate);
-
-        return chunk(ids, chunkSize);
-      });
-
-      console.log(count, stages.map(cycles => cycles.length));
-
-      await this.buildStages(txc, this.training.id, stages);
-
-      return this.training;
-    }).catch(e => console.log(e))
-      .finally(() => session.close());
   }
 }
 

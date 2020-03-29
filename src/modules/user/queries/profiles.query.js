@@ -30,7 +30,6 @@ class ProfilesQuery extends Action {
         }) as profiles
       `, params);
 
-      console.log(records[0].get('profiles'));
       return records[0].get('profiles');
     } catch (err) {
       throw err;

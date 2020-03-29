@@ -1,12 +1,28 @@
 const uuid = require('uuid/v4');
 
-const { TYPE_THROUGH, TYPE_CYCLES } = require('./constant.util');
+const { TYPE_THROUGH, TYPE_CYCLES, HANDLER_BUILDER, HANDLER_ITERATOR, HANDLER_META } = require('./constant.util');
 const ThroughBuilder = require('./through-builder.util');
-const CyclesBuilder = require('./cycles-builder.util');
 const ThroughIterator = require('./through-iterator.util');
+const ThroughMeta = require('./through-meta.util');
+const CyclesBuilder = require('./cycles-builder.util');
 const CyclesIterator = require('./cycles-iterator.util');
+const CyclesMeta = require('./cycles-meta.util');
+
+const HANDLERS = {
+  [TYPE_THROUGH]: {
+    [HANDLER_BUILDER]: ThroughBuilder,
+    [HANDLER_ITERATOR]: ThroughIterator,
+    [HANDLER_META]: ThroughMeta,
+  },
+  [TYPE_CYCLES]: {
+    [HANDLER_BUILDER]: CyclesBuilder,
+    [HANDLER_ITERATOR]: CyclesIterator,
+    [HANDLER_META]: CyclesMeta,
+  }
+};
 
 class Training {
+
   constructor(driver, id, type) {
     this.driver = driver;
     this.id = id;
@@ -89,43 +105,45 @@ class Training {
     return new Training(driver, id, type);
   }
 
-  _builder() {
-    switch (this.type) {
-      case TYPE_CYCLES:
-        return new CyclesBuilder(this.driver, this);
-      case TYPE_THROUGH:
-      default:
-        return new ThroughBuilder(this.driver, this);
-    }
-  }
+  _handler(handlerType) {
+    const Handler = HANDLERS[this.type][handlerType];
 
-  _iterator() {
-    switch (this.type) {
-      case TYPE_CYCLES:
-        return new CyclesIterator(this.driver, this.id);
-      case TYPE_THROUGH:
-      default:
-        return new ThroughIterator(this.driver, this.id);
+    if (!Handler) {
+      throw new Error('No handler for such params.')
     }
+
+    return new Handler(this.driver, this.id);
   }
 
   async build() {
-    const builder = this._builder();
+    const builder = this._handler(HANDLER_BUILDER);
     await builder.build();
 
     return { id: this.id, type: this.type };
   }
 
+  async meta() {
+    const meta = this._handler(HANDLER_META);
+
+    return meta.collect();
+  }
+
   async next() {
-    const iterator = this._iterator();
+    const iterator = this._handler(HANDLER_ITERATOR);
 
     return iterator.next();
   }
 
   async complete(translationId) {
-    const iterator = this._iterator();
+    const iterator = this._handler(HANDLER_ITERATOR);
 
     return iterator.complete(translationId);
+  }
+
+  async reset() {
+    const iterator = this._handler(HANDLER_ITERATOR);
+
+    return iterator.reset();
   }
 }
 

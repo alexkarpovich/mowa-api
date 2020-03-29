@@ -52,6 +52,17 @@ class ThroughIterator {
       session.close();
     }
   }
+
+  async reset() {
+    const session = this.driver.session();
+
+    await session.run(`
+      MATCH (train:Training{id: $id})-[r:HAS_COMPLETED]->(trans:Translation)
+      DELETE r
+    `, { id: this.trainingId });
+
+    return true;
+  }
 }
 
 module.exports = ThroughIterator;

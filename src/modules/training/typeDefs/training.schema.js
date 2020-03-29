@@ -11,10 +11,17 @@ module.exports = gql`
     translation: Translation!
   }
 
+  type TrainingMetaStage {
+    id: Int!
+    cycles: Int!
+    complete: Int!
+  }
+
   type TrainingMeta {
     type: Int!
     complete: Int!
     total: Int!
+    stages: [TrainingMetaStage!]
   }
 
   type Query {

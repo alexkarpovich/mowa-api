@@ -1,3 +1,5 @@
+const CyclesBuilder = require('./cycles-builder.util');
+
 class CyclesIterator {
   constructor(driver, trainingId) {
     this.driver = driver;
@@ -83,6 +85,24 @@ class CyclesIterator {
 
     }).catch(e => console.log(e))
       .finally(() => session.close());
+  }
+
+  async reset() {
+    const session = this.driver.session();
+
+    return session.readTransaction(async (txc) => {
+
+      await txc.run(`
+        MATCH (train:Training{id: $id})-[:INCLUDES]->(stage:Stage)-[:INCLUDES]->(cycle:Cycle)
+        DETACH DELETE stage
+        DETACH DELETE cycle
+      `, {id: this.trainingId});
+
+      const builder = new CyclesBuilder(txc, this.trainingId);
+      await builder.build();
+
+      return true;
+    });
   }
 }
 

@@ -1,23 +1,14 @@
 const Action = require('../../core/action');
+const Training = require('../utils/training.util');
 
 class ResetTraining extends Action {
   async response() {
     const { driver } = this.context;
-    const session = driver.session();
+    const { id } = this.args;
 
-    try {
-      await session.run(`
-        MATCH (train:Training{id: $id})-[r:HAS_COMPLETED]->(trans:Translation)
-        DELETE r
-      `, this.args);
+    const training = await Training.init({ driver, id });
 
-      return true;
-    } catch (err) {
-      console.log(err);
-      throw err;
-    } finally {
-      session.close();
-    }
+    return training.reset();
   }
 }
 
