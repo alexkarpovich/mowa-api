@@ -1,6 +1,7 @@
 const TermsQuery = require('../queries/terms.query');
 const CountQuery = require('../queries/count.query');
 const EditSet = require('../mutations/edit');
+const CloneSet = require('../mutations/clone');
 const DeleteSet = require('../mutations/delete');
 const AttachTerm = require('../mutations/attach-term');
 const DetachTerm = require('../mutations/detach-term');
@@ -15,6 +16,8 @@ module.exports = {
   Mutation: {
     editSet: (parent, args, context, info) =>
       EditSet.exec({ parent, args, context, info }),
+    cloneSet: (parent, args, context, info) =>
+      CloneSet.exec({ parent, args, context, info }),
     deleteSet: (parent, args, context, info) =>
       DeleteSet.exec({ parent, args, context, info }),
     attachTerm: (parent, args, context, info) =>

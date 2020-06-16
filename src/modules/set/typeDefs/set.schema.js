@@ -13,6 +13,7 @@ module.exports = gql`
 
   type Mutation {
     editSet(id: ID!, name: String!) : ID!
+    cloneSet(ids: [ID!], name: String!) : Set!
     deleteSet(id: ID!) : ID!
     attachTerm(id: ID!, value: String) : Term!
     detachTerm(id: ID!, termId: ID!) : ID!
