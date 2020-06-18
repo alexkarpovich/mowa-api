@@ -23,12 +23,10 @@ class CyclesBuilder {
       UNWIND range(0, size($stages)-1) as sid
       WITH train, active, $stages[sid] as cycles, sid
       MERGE (train)-[:INCLUDES]->(stage:Stage{id: sid+1})
-        ON CREATE SET stage.prev = CASE sid WHEN 0 THEN [] ELSE [sid] END,
-          stage.active = CASE sid WHEN 0 THEN [1] ELSE [] END
+        ON CREATE SET stage.active = CASE sid WHEN 0 THEN [1] ELSE [] END
       FOREACH(i IN stage.active |
         MERGE (active)-[:INCLUDES]->(stage)
       )
-      REMOVE stage.prev
       REMOVE stage.active
       WITH active, sid, stage, cycles
       UNWIND range(0, size(cycles)-1) as cid

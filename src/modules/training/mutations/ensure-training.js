@@ -9,7 +9,9 @@ class EnsureTraining extends Action {
 
     const training = await Training.init({ driver, type, setIds });
 
-    return training.build();
+    training.build();
+
+    return training;
   }
 }
 
