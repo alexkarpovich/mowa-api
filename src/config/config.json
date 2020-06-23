@@ -13,7 +13,7 @@
     "uri": "amqp://root:root@rabbitmq:5672"
   },
   "apollo": {
-    "path": "/graphql"
+    "path": "/api/graphql"
   },
   "neo4j": {
     "uri": "bolt://neo4j:7687",
