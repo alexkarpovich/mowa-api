@@ -9,10 +9,10 @@ class ActivateProfile extends Action {
 
     try {
       await session.run(`
-        MATCH (newActive:Profile{id: $id}),
-          (u:User{id: $uid})-[:OWNS]->(p:Profile)<-[r:INCLUDES]-(:Active)
+        MATCH (newActive:Profile{id: $id}), (active:Active),
+          (u:User{id: $uid})-[:OWNS]->(p:Profile)<-[r:INCLUDES]-(active)
         DELETE r
-        MERGE (newActive)<-[:INCLUDES]-(:Active)
+        MERGE (newActive)<-[:INCLUDES]-(active)
       `, params);
 
       return true;
